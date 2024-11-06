@@ -30,10 +30,17 @@ export class StudentsController {
     console.log(`------>correct route hit<-----------s`);
     return await this.studentsService.getAllTablesValues();
   }
+
   @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return await this.studentsService.findOne(+id);
+  async getOneAllValue(@Param('id') id: string) {
+    console.log(`getOneAllValue route hit`);
+    return await this.studentsService.getOneAllValue(+id);
   }
+
+  // @Get(':id')
+  // async findOne(@Param('id') id: string) {
+  //   return await this.studentsService.findOne(+id);
+  // }
 
   @Patch(':id')
   async update(
