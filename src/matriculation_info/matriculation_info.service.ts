@@ -1,23 +1,45 @@
 import { Injectable } from '@nestjs/common';
-import { CreateMatriculationInfoDto } from './dto/create-matriculation_info.dto';
-import { UpdateMatriculationInfoDto } from './dto/update-matriculation_info.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class MatriculationInfoService {
-  create(createMatriculationInfoDto: CreateMatriculationInfoDto) {
-    return 'This action adds a new matriculationInfo';
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(
+    student_id: number,
+    matriculationData: Prisma.matriculation_infoCreateInput,
+  ) {
+    return await this.prisma.matriculation_info.create({
+      data: {
+        ...matriculationData,
+        students: {
+          connect: { student_id }, // Correctly connect using the 'students' relation field
+        },
+      },
+    });
   }
 
-  findAll() {
-    return `This action returns all matriculationInfo`;
+  async findAll() {
+    return await this.prisma.matriculation_info.findMany({
+      orderBy: {
+        student_id: 'asc',
+      },
+    });
   }
 
   findOne(id: number) {
     return `This action returns a #${id} matriculationInfo`;
   }
 
-  update(id: number, updateMatriculationInfoDto: UpdateMatriculationInfoDto) {
-    return `This action updates a #${id} matriculationInfo`;
+  update(
+    id: number,
+    updateMatriculationInfoDto: Prisma.matriculation_infoUpdateInput,
+  ) {
+    return this.prisma.matriculation_info.update({
+      where: { student_id: id },
+      data: updateMatriculationInfoDto,
+    });
   }
 
   remove(id: number) {

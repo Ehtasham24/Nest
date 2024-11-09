@@ -1,19 +1,34 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { MatriculationInfoService } from './matriculation_info.service';
-import { CreateMatriculationInfoDto } from './dto/create-matriculation_info.dto';
-import { UpdateMatriculationInfoDto } from './dto/update-matriculation_info.dto';
+import { Prisma } from '@prisma/client';
 
 @Controller('matriculation-info')
 export class MatriculationInfoController {
-  constructor(private readonly matriculationInfoService: MatriculationInfoService) {}
+  constructor(
+    private readonly matriculationInfoService: MatriculationInfoService,
+  ) {}
 
   @Post()
-  create(@Body() createMatriculationInfoDto: CreateMatriculationInfoDto) {
-    return this.matriculationInfoService.create(createMatriculationInfoDto);
+  async create(
+    @Body()
+    createMatriculationInfoDto: Prisma.matriculation_infoCreateInput & {
+      student_id: string;
+    },
+  ) {
+    const { student_id, ...matriculationData } = createMatriculationInfoDto;
+    return this.matriculationInfoService.create(+student_id, matriculationData);
   }
 
   @Get()
-  findAll() {
+  async findAll() {
     return this.matriculationInfoService.findAll();
   }
 
@@ -23,8 +38,14 @@ export class MatriculationInfoController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateMatriculationInfoDto: UpdateMatriculationInfoDto) {
-    return this.matriculationInfoService.update(+id, updateMatriculationInfoDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateMatriculationInfoDto: Prisma.matriculation_infoUpdateInput,
+  ) {
+    return this.matriculationInfoService.update(
+      +id,
+      updateMatriculationInfoDto,
+    );
   }
 
   @Delete(':id')

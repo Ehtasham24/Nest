@@ -1,26 +1,41 @@
 import { Injectable } from '@nestjs/common';
-import { CreateGuardianDto } from './dto/create-guardian.dto';
-import { UpdateGuardianDto } from './dto/update-guardian.dto';
+import { guardians, Prisma } from '@prisma/client';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class GuardiansService {
-  create(createGuardianDto: CreateGuardianDto) {
-    return 'This action adds a new guardian';
+  constructor(private readonly prisma: PrismaService) {}
+  async create(student_id: number, guardiansInfo: Prisma.guardiansCreateInput) {
+    return await this.prisma.guardians.create({
+      data: {
+        ...guardiansInfo,
+        students: {
+          connect: { student_id },
+        },
+      },
+    });
   }
 
-  findAll() {
-    return `This action returns all guardians`;
+  async findAll() {
+    return await this.prisma.guardians.findMany({
+      orderBy: { student_id: 'asc' },
+    });
   }
 
   findOne(id: number) {
     return `This action returns a #${id} guardian`;
   }
 
-  update(id: number, updateGuardianDto: UpdateGuardianDto) {
-    return `This action updates a #${id} guardian`;
+  async update(id: number, updateGuardianDto: Prisma.guardiansUpdateInput) {
+    return await this.prisma.guardians.update({
+      where: { student_id: id },
+      data: updateGuardianDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} guardian`;
+  async remove(id: number) {
+    return await this.prisma.guardians.delete({
+      where: { student_id: id },
+    });
   }
 }

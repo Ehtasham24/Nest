@@ -1,30 +1,48 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { GuardiansService } from './guardians.service';
-import { CreateGuardianDto } from './dto/create-guardian.dto';
-import { UpdateGuardianDto } from './dto/update-guardian.dto';
+import { Prisma } from '@prisma/client';
 
 @Controller('guardians')
 export class GuardiansController {
   constructor(private readonly guardiansService: GuardiansService) {}
 
   @Post()
-  create(@Body() createGuardianDto: CreateGuardianDto) {
-    return this.guardiansService.create(createGuardianDto);
+  async create(
+    @Body()
+    createGuardianDto: Prisma.guardiansCreateInput & { student_id: string },
+  ) {
+    try {
+      const { student_id, ...guardiansInfo } = createGuardianDto;
+      return await this.guardiansService.create(+student_id, guardiansInfo);
+    } catch (err) {
+      throw new Error(err);
+    }
   }
 
   @Get()
-  findAll() {
-    return this.guardiansService.findAll();
+  async findAll() {
+    return await this.guardiansService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string) {
     return this.guardiansService.findOne(+id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateGuardianDto: UpdateGuardianDto) {
-    return this.guardiansService.update(+id, updateGuardianDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateGuardianDto: Prisma.guardiansUpdateInput,
+  ) {
+    return await this.guardiansService.update(+id, updateGuardianDto);
   }
 
   @Delete(':id')

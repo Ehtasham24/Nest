@@ -1,19 +1,37 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { IntermediateInfoService } from './intermediate_info.service';
-import { CreateIntermediateInfoDto } from './dto/create-intermediate_info.dto';
-import { UpdateIntermediateInfoDto } from './dto/update-intermediate_info.dto';
+import { Prisma } from '@prisma/client';
 
 @Controller('intermediate-info')
 export class IntermediateInfoController {
-  constructor(private readonly intermediateInfoService: IntermediateInfoService) {}
-
+  constructor(
+    private readonly intermediateInfoService: IntermediateInfoService,
+  ) {}
   @Post()
-  create(@Body() createIntermediateInfoDto: CreateIntermediateInfoDto) {
-    return this.intermediateInfoService.create(createIntermediateInfoDto);
+  async create(
+    @Body()
+    createMatriculationInfoDto: Prisma.matriculation_infoCreateInput & {
+      student_id: string;
+    },
+  ) {
+    try {
+      const { student_id, ...intermediateInfo } = createMatriculationInfoDto;
+      return this.intermediateInfoService.create(+student_id, intermediateInfo);
+    } catch (err) {
+      throw new Error(err);
+    }
   }
 
   @Get()
-  findAll() {
+  async findAll() {
     return this.intermediateInfoService.findAll();
   }
 
@@ -23,7 +41,10 @@ export class IntermediateInfoController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateIntermediateInfoDto: UpdateIntermediateInfoDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateIntermediateInfoDto: Prisma.intermediate_infoUpdateInput,
+  ) {
     return this.intermediateInfoService.update(+id, updateIntermediateInfoDto);
   }
 

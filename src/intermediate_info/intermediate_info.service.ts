@@ -1,23 +1,48 @@
 import { Injectable } from '@nestjs/common';
-import { CreateIntermediateInfoDto } from './dto/create-intermediate_info.dto';
-import { UpdateIntermediateInfoDto } from './dto/update-intermediate_info.dto';
-
+import { PrismaService } from 'src/prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 @Injectable()
 export class IntermediateInfoService {
-  create(createIntermediateInfoDto: CreateIntermediateInfoDto) {
-    return 'This action adds a new intermediateInfo';
+  constructor(private readonly prisma: PrismaService) {}
+  async create(
+    student_id: number,
+    intermediateInfo: Prisma.matriculation_infoCreateInput,
+  ) {
+    try {
+      return await this.prisma.intermediate_info.create({
+        data: {
+          ...intermediateInfo,
+          students: {
+            connect: { student_id }, // Correctly connect using the 'students' relation field
+          },
+        },
+      });
+    } catch (err) {
+      console.log(err);
+      return err;
+    }
   }
 
-  findAll() {
-    return `This action returns all intermediateInfo`;
+  async findAll() {
+    try {
+      return this.prisma.intermediate_info.findMany();
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   findOne(id: number) {
     return `This action returns a #${id} intermediateInfo`;
   }
 
-  update(id: number, updateIntermediateInfoDto: UpdateIntermediateInfoDto) {
-    return `This action updates a #${id} intermediateInfo`;
+  update(
+    id: number,
+    updateIntermediateInfoDto: Prisma.intermediate_infoUpdateInput,
+  ) {
+    return this.prisma.intermediate_info.update({
+      where: { student_id: id },
+      data: updateIntermediateInfoDto,
+    });
   }
 
   remove(id: number) {

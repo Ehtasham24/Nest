@@ -15,6 +15,8 @@ import { BasicInfoModule } from './basic_info/basic_info.module';
 
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PrismaModule } from './prisma/prisma.module';
+import { RequiredDocumentsModule } from './required_documents/required_documents.module';
+import { FirebaseModule } from './firebase/firebase.module';
 
 @Module({
   imports: [
@@ -29,6 +31,8 @@ import { PrismaModule } from './prisma/prisma.module';
     AdmissionsModule,
     BasicInfoModule,
     PrismaModule,
+    RequiredDocumentsModule,
+    FirebaseModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

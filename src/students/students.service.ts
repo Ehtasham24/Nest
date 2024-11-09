@@ -1,12 +1,37 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { FirebaseService } from 'src/firebase/firebase.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class StudentsService {
-  constructor(private readonly prisma: PrismaService) {}
-  async create(createStudentDto: Prisma.studentsCreateInput) {
-    return await this.prisma.students.create({ data: createStudentDto });
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly firebaseService: FirebaseService,
+  ) {}
+  // async create(createStudentDto: Prisma.studentsCreateInput) {
+  //   return await this.prisma.students.create({ data: createStudentDto });
+  // }
+  async createStudentWithProfile(
+    studentData: Prisma.studentsCreateInput,
+    profileImage: Express.Multer.File,
+  ): Promise<any> {
+    // 1. Upload the image to Firebase and get the URL
+    const profilePhotoUrl = await this.firebaseService.uploadFile(profileImage);
+
+    // 2. Add the profile photo URL to the student data
+    const studentDataWithPhoto = {
+      ...studentData,
+      profile_photo: profilePhotoUrl, // Ensure this field matches your Prisma schema
+    };
+
+    // 3. Save the student data with the profile photo URL to the database
+    const createdStudent = await this.prisma.students.create({
+      data: studentDataWithPhoto,
+    });
+
+    // 4. Return the newly created student record, including the profile photo URL
+    return createdStudent;
   }
 
   async findAll() {
@@ -28,6 +53,9 @@ export class StudentsService {
         matriculation_info: true,
         intermediate_info: true,
       },
+      orderBy: {
+        student_id: 'asc',
+      },
     });
   }
 
@@ -41,6 +69,7 @@ export class StudentsService {
         admissions: true,
         matriculation_info: true,
         intermediate_info: true,
+        required_documents: true,
       },
     });
   }

@@ -1,22 +1,47 @@
 import { Injectable } from '@nestjs/common';
-import { CreateResidenceInfoDto } from './dto/create-residence_info.dto';
-import { UpdateResidenceInfoDto } from './dto/update-residence_info.dto';
-
+import { Prisma } from '@prisma/client';
+import { connect } from 'http2';
+import { PrismaService } from 'src/prisma/prisma.service';
 @Injectable()
 export class ResidenceInfoService {
-  create(createResidenceInfoDto: CreateResidenceInfoDto) {
-    return 'This action adds a new residenceInfo';
+  constructor(private readonly prisma: PrismaService) {}
+  async create(
+    student_id: number,
+    ResidenceInfo: Prisma.residence_informationCreateInput,
+  ) {
+    try {
+      return await this.prisma.residence_information.create({
+        data: {
+          ...ResidenceInfo,
+          students: {
+            connect: {
+              student_id,
+            },
+          },
+        },
+      });
+    } catch (err) {
+      console.log(err);
+      throw new Error(err);
+    }
   }
 
-  findAll() {
-    return `This action returns all residenceInfo`;
+  async findAll() {
+    try {
+      return await this.prisma.residence_information.findMany();
+    } catch (err) {
+      throw new Error(err);
+    }
   }
 
   findOne(id: number) {
     return `This action returns a #${id} residenceInfo`;
   }
 
-  update(id: number, updateResidenceInfoDto: UpdateResidenceInfoDto) {
+  update(
+    id: number,
+    updateResidenceInfoDto: Prisma.residence_informationUpdateInput,
+  ) {
     return `This action updates a #${id} residenceInfo`;
   }
 

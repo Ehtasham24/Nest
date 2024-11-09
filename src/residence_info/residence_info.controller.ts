@@ -1,20 +1,37 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { ResidenceInfoService } from './residence_info.service';
-import { CreateResidenceInfoDto } from './dto/create-residence_info.dto';
-import { UpdateResidenceInfoDto } from './dto/update-residence_info.dto';
+import { Prisma } from '@prisma/client';
 
 @Controller('residence-info')
 export class ResidenceInfoController {
   constructor(private readonly residenceInfoService: ResidenceInfoService) {}
 
   @Post()
-  create(@Body() createResidenceInfoDto: CreateResidenceInfoDto) {
-    return this.residenceInfoService.create(createResidenceInfoDto);
+  async create(
+    @Body()
+    createResidenceInfoDto: Prisma.residence_informationCreateInput & {
+      student_id: string;
+    },
+  ) {
+    try {
+      const { student_id, ...residenceInfo } = createResidenceInfoDto;
+      return await this.residenceInfoService.create(+student_id, residenceInfo);
+    } catch (err) {
+      throw new Error(err);
+    }
   }
 
   @Get()
-  findAll() {
-    return this.residenceInfoService.findAll();
+  async findAll() {
+    return await this.residenceInfoService.findAll();
   }
 
   @Get(':id')
@@ -23,7 +40,10 @@ export class ResidenceInfoController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateResidenceInfoDto: UpdateResidenceInfoDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateResidenceInfoDto: Prisma.residence_informationUpdateInput,
+  ) {
     return this.residenceInfoService.update(+id, updateResidenceInfoDto);
   }
 

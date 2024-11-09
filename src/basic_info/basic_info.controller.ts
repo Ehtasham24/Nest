@@ -1,30 +1,50 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { BasicInfoService } from './basic_info.service';
-import { CreateBasicInfoDto } from './dto/create-basic_info.dto';
-import { UpdateBasicInfoDto } from './dto/update-basic_info.dto';
+import { Prisma } from '@prisma/client';
 
 @Controller('basic-info')
 export class BasicInfoController {
   constructor(private readonly basicInfoService: BasicInfoService) {}
 
   @Post()
-  create(@Body() createBasicInfoDto: CreateBasicInfoDto) {
-    return this.basicInfoService.create(createBasicInfoDto);
+  create(
+    @Body()
+    createBasicInfoDto: Prisma.basic_informationCreateInput & {
+      student_id: string;
+    },
+  ) {
+    try {
+      const { student_id, ...basicInfo } = createBasicInfoDto;
+      return this.basicInfoService.create(+student_id, basicInfo);
+    } catch (err) {
+      throw new Error(err);
+    }
   }
 
   @Get()
-  findAll() {
-    return this.basicInfoService.findAll();
+  async findAll() {
+    return await this.basicInfoService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.basicInfoService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    return await this.basicInfoService.findOne(+id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBasicInfoDto: UpdateBasicInfoDto) {
-    return this.basicInfoService.update(+id, updateBasicInfoDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateBasicInfoDto: Prisma.basic_informationUpdateInput,
+  ) {
+    return await this.basicInfoService.update(+id, updateBasicInfoDto);
   }
 
   @Delete(':id')

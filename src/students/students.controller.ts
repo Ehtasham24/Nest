@@ -6,6 +6,8 @@ import {
   Patch,
   Param,
   Delete,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { StudentsService } from './students.service';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -16,8 +18,19 @@ export class StudentsController {
   constructor(private readonly studentsService: StudentsService) {}
 
   @Post()
-  async create(@Body() createStudentDto: Prisma.studentsCreateInput) {
-    return await this.studentsService.create(createStudentDto);
+  @UseInterceptors(FileInterceptor('profileImage'))
+  async createStudentWithProfile(
+    @Body() createStudentDto: Prisma.studentsCreateInput,
+    @UploadedFile() profileImage: Express.Multer.File,
+  ) {
+    try {
+      return await this.studentsService.createStudentWithProfile(
+        createStudentDto,
+        profileImage,
+      );
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   @Get()

@@ -1,23 +1,47 @@
 import { Injectable } from '@nestjs/common';
-import { CreateBasicInfoDto } from './dto/create-basic_info.dto';
-import { UpdateBasicInfoDto } from './dto/update-basic_info.dto';
-
+import { Prisma } from '@prisma/client';
+import { PrismaService } from 'src/prisma/prisma.service';
 @Injectable()
 export class BasicInfoService {
-  create(createBasicInfoDto: CreateBasicInfoDto) {
-    return 'This action adds a new basicInfo';
+  constructor(private readonly prisma: PrismaService) {}
+  async create(
+    student_id: number,
+    basicInfo: Prisma.basic_informationCreateInput,
+  ) {
+    return await this.prisma.basic_information.create({
+      data: {
+        ...basicInfo,
+        students: {
+          connect: { student_id },
+        },
+      },
+    });
   }
 
-  findAll() {
-    return `This action returns all basicInfo`;
+  async findAll() {
+    return await this.prisma.basic_information.findMany({
+      orderBy: {
+        student_id: 'asc',
+      },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} basicInfo`;
+  async findOne(id: number) {
+    return await this.prisma.basic_information.findUnique({
+      where: {
+        student_id: id,
+      },
+    });
   }
 
-  update(id: number, updateBasicInfoDto: UpdateBasicInfoDto) {
-    return `This action updates a #${id} basicInfo`;
+  async update(
+    id: number,
+    updateBasicInfoDto: Prisma.basic_informationUpdateInput,
+  ) {
+    return await this.prisma.basic_information.update({
+      where: { student_id: id },
+      data: updateBasicInfoDto,
+    });
   }
 
   remove(id: number) {
