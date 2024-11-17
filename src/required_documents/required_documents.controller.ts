@@ -50,11 +50,12 @@ export class RequiredDocumentsController {
   ) {
     // Cast 'student_id' to number
     const studentIdNumber = parseInt(student_id, 10); // Use parseInt to convert to a number
-
+    const step = `step_8`;
     // Pass the converted student ID to the service
     return this.requiredDocumentsService.createDocumentWithFiles(
       studentIdNumber,
       files,
+      step,
     );
   }
 

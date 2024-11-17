@@ -23,8 +23,13 @@ export class IntermediateInfoController {
     },
   ) {
     try {
+      const step = 'step_7';
       const { student_id, ...intermediateInfo } = createMatriculationInfoDto;
-      return this.intermediateInfoService.create(+student_id, intermediateInfo);
+      return this.intermediateInfoService.create(
+        +student_id,
+        intermediateInfo,
+        step,
+      );
     } catch (err) {
       throw new Error(err);
     }

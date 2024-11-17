@@ -24,9 +24,11 @@ export class StudentsController {
     @UploadedFile() profileImage: Express.Multer.File,
   ) {
     try {
+      const step = `step_1`;
       return await this.studentsService.createStudentWithProfile(
         createStudentDto,
         profileImage,
+        step,
       );
     } catch (err) {
       console.log(err);

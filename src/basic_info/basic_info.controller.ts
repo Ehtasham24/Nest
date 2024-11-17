@@ -22,8 +22,9 @@ export class BasicInfoController {
     },
   ) {
     try {
+      const step = 'step_3';
       const { student_id, ...basicInfo } = createBasicInfoDto;
-      return this.basicInfoService.create(+student_id, basicInfo);
+      return this.basicInfoService.create(+student_id, basicInfo, step);
     } catch (err) {
       throw new Error(err);
     }

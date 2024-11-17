@@ -23,8 +23,13 @@ export class MatriculationInfoController {
       student_id: string;
     },
   ) {
+    const step = 'step_6';
     const { student_id, ...matriculationData } = createMatriculationInfoDto;
-    return this.matriculationInfoService.create(+student_id, matriculationData);
+    return this.matriculationInfoService.create(
+      +student_id,
+      matriculationData,
+      step,
+    );
   }
 
   @Get()

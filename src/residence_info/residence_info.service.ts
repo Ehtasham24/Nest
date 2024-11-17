@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, Steps } from '@prisma/client';
 import { connect } from 'http2';
 import { PrismaService } from 'src/prisma/prisma.service';
 @Injectable()
@@ -8,18 +8,25 @@ export class ResidenceInfoService {
   async create(
     student_id: number,
     ResidenceInfo: Prisma.residence_informationCreateInput,
+    step: Steps,
   ) {
     try {
-      return await this.prisma.residence_information.create({
-        data: {
-          ...ResidenceInfo,
-          students: {
-            connect: {
-              student_id,
+      return await this.prisma.$transaction([
+        this.prisma.residence_information.create({
+          data: {
+            ...ResidenceInfo,
+            students: {
+              connect: {
+                student_id,
+              },
             },
           },
-        },
-      });
+        }),
+        this.prisma.students.update({
+          where: { student_id: student_id },
+          data: { steps: step },
+        }),
+      ]);
     } catch (err) {
       console.log(err);
       throw new Error(err);

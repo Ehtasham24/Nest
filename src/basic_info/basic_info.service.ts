@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, Steps } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 @Injectable()
 export class BasicInfoService {
@@ -7,15 +7,22 @@ export class BasicInfoService {
   async create(
     student_id: number,
     basicInfo: Prisma.basic_informationCreateInput,
+    step: Steps,
   ) {
-    return await this.prisma.basic_information.create({
-      data: {
-        ...basicInfo,
-        students: {
-          connect: { student_id },
+    return await this.prisma.$transaction([
+      this.prisma.basic_information.create({
+        data: {
+          ...basicInfo,
+          students: {
+            connect: { student_id },
+          },
         },
-      },
-    });
+      }),
+      this.prisma.students.update({
+        where: { student_id: student_id },
+        data: { steps: step },
+      }),
+    ]);
   }
 
   async findAll() {

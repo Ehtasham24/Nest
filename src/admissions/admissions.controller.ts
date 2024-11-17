@@ -16,8 +16,20 @@ export class AdmissionsController {
   constructor(private readonly admissionsService: AdmissionsService) {}
 
   @Post()
-  async create(@Body() data: Prisma.admissionsCreateInput) {
-    return await this.admissionsService.create(data);
+  async create(
+    @Body() data: Prisma.admissionsCreateInput & { student_id: string },
+  ) {
+    try {
+      const steps = 'step_2';
+      const { student_id, ...admissionsInfo } = data;
+      return await this.admissionsService.create(
+        +student_id,
+        admissionsInfo,
+        steps,
+      );
+    } catch (err) {
+      throw new Error(err);
+    }
   }
 
   @Get()

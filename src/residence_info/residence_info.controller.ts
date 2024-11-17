@@ -22,8 +22,13 @@ export class ResidenceInfoController {
     },
   ) {
     try {
+      const step = 'step_4';
       const { student_id, ...residenceInfo } = createResidenceInfoDto;
-      return await this.residenceInfoService.create(+student_id, residenceInfo);
+      return await this.residenceInfoService.create(
+        +student_id,
+        residenceInfo,
+        step,
+      );
     } catch (err) {
       throw new Error(err);
     }

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, Steps } from '@prisma/client';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -15,6 +15,7 @@ export class StudentsService {
   async createStudentWithProfile(
     studentData: Prisma.studentsCreateInput,
     profileImage: Express.Multer.File,
+    step: Steps,
   ): Promise<any> {
     // 1. Upload the image to Firebase and get the URL
     const profilePhotoUrl = await this.firebaseService.uploadFile(profileImage);
@@ -23,6 +24,7 @@ export class StudentsService {
     const studentDataWithPhoto = {
       ...studentData,
       profile_photo: profilePhotoUrl, // Ensure this field matches your Prisma schema
+      steps: step,
     };
 
     // 3. Save the student data with the profile photo URL to the database

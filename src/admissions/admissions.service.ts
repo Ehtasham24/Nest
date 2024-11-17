@@ -1,14 +1,31 @@
 // src/admissions/admissions.service.ts
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Prisma } from '@prisma/client';
+import { Prisma, Steps } from '@prisma/client';
 
 @Injectable()
 export class AdmissionsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(data: Prisma.admissionsCreateInput) {
-    return await this.prisma.admissions.create({ data });
+  async create(
+    student_id: number,
+    data: Prisma.admissionsCreateInput,
+    step: Steps,
+  ) {
+    return await this.prisma.$transaction([
+      this.prisma.admissions.create({
+        data: {
+          ...data,
+          students: {
+            connect: { student_id },
+          },
+        },
+      }),
+      this.prisma.students.update({
+        where: { student_id: student_id },
+        data: { steps: step },
+      }),
+    ]);
   }
 
   async findAll() {

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Prisma } from '@prisma/client';
+import { Prisma, Steps } from '@prisma/client';
 
 @Injectable()
 export class MatriculationInfoService {
@@ -9,15 +9,22 @@ export class MatriculationInfoService {
   async create(
     student_id: number,
     matriculationData: Prisma.matriculation_infoCreateInput,
+    step: Steps,
   ) {
-    return await this.prisma.matriculation_info.create({
-      data: {
-        ...matriculationData,
-        students: {
-          connect: { student_id }, // Correctly connect using the 'students' relation field
+    return await this.prisma.$transaction([
+      this.prisma.matriculation_info.create({
+        data: {
+          ...matriculationData,
+          students: {
+            connect: { student_id }, // Correctly connect using the 'students' relation field
+          },
         },
-      },
-    });
+      }),
+      this.prisma.students.update({
+        where: { student_id: student_id },
+        data: { steps: step },
+      }),
+    ]);
   }
 
   async findAll() {

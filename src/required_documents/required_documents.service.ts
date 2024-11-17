@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, Steps } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { BadRequestException } from '@nestjs/common';
@@ -22,6 +22,7 @@ export class RequiredDocumentsService {
       matric_certificate?: Express.Multer.File[];
       intermediate_part1_marksheet?: Express.Multer.File[];
     },
+    step: Steps,
   ) {
     try {
       // Prepare an object to store file URLs based on the field name
@@ -43,12 +44,18 @@ export class RequiredDocumentsService {
       }
 
       // Store the document data with the file URLs in the Prisma database
-      return await this.prisma.required_documents.create({
-        data: {
-          student_id,
-          ...fileUrls,
-        },
-      });
+      return await this.prisma.$transaction([
+        this.prisma.required_documents.create({
+          data: {
+            student_id,
+            ...fileUrls,
+          },
+        }),
+        this.prisma.students.update({
+          where: { student_id: student_id },
+          data: { steps: step },
+        }),
+      ]);
     } catch (err) {
       console.error('Error in createDocumentWithFiles:', err);
       throw new BadRequestException(

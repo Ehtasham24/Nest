@@ -20,8 +20,13 @@ export class GuardiansController {
     createGuardianDto: Prisma.guardiansCreateInput & { student_id: string },
   ) {
     try {
+      const step = 'step_5';
       const { student_id, ...guardiansInfo } = createGuardianDto;
-      return await this.guardiansService.create(+student_id, guardiansInfo);
+      return await this.guardiansService.create(
+        +student_id,
+        guardiansInfo,
+        step,
+      );
     } catch (err) {
       throw new Error(err);
     }
