@@ -33,6 +33,7 @@ export class StudentsService {
     });
 
     // 4. Return the newly created student record, including the profile photo URL
+    console.log(createdStudent);
     return createdStudent;
   }
 
@@ -77,6 +78,11 @@ export class StudentsService {
   }
 
   async update(id: number, updateStudentDto: Prisma.studentsUpdateInput) {
+    console.log(
+      `ID: ${id}, Updating student with data: ${JSON.stringify(updateStudentDto)}`,
+    );
+
+    // Ensure the data is valid and mapped correctly for Prisma
     return await this.prisma.students.update({
       where: { student_id: id },
       data: updateStudentDto,
