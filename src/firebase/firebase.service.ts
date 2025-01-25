@@ -39,4 +39,22 @@ export class FirebaseService {
     await fileUpload.makePublic();
     return `https://storage.googleapis.com/${bucket.name}/${uniqueFileName}`;
   }
+  async deleteFile(fileUrl: string): Promise<void> {
+    try {
+      const bucket = admin.storage().bucket(); // Access the storage bucket
+
+      // Extract file path from the provided URL
+      const filePath = fileUrl.split('/o/')[1].split('?')[0]; // Extract path after "/o/" and remove query params
+      const decodedFilePath = decodeURIComponent(filePath); // Decode the file path
+
+      // Delete the file from Firebase Storage
+      await bucket.file(decodedFilePath).delete();
+      console.log(`Successfully deleted file: ${decodedFilePath}`);
+    } catch (error) {
+      console.error(
+        'Error deleting file from Firebase:',
+        error.message || error,
+      );
+    }
+  }
 }

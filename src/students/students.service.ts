@@ -81,6 +81,7 @@ export class StudentsService {
     console.log(
       `ID: ${id}, Updating student with data: ${JSON.stringify(updateStudentDto)}`,
     );
+    console.log('Update DTO:', updateStudentDto);
 
     // Ensure the data is valid and mapped correctly for Prisma
     return await this.prisma.students.update({

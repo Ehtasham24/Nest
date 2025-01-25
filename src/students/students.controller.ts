@@ -13,10 +13,14 @@ import {
 import { StudentsService } from './students.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Prisma } from '@prisma/client';
+import { FirebaseService } from '../firebase/firebase.service';
 
 @Controller('students')
 export class StudentsController {
-  constructor(private readonly studentsService: StudentsService) {}
+  constructor(
+    private readonly studentsService: StudentsService,
+    private readonly firebaseService: FirebaseService,
+  ) {}
 
   @Post()
   @UseInterceptors(FileInterceptor('profileImage'))
@@ -75,33 +79,63 @@ export class StudentsController {
   //   return await this.studentsService.findOne(+id);
   // }
 
+  // @Patch(':id')
+  // @UseInterceptors(FileInterceptor('profileImage')) // Intercept file uploads under 'profileImage'
+  // async update(
+  //   @Param('id') id: string,
+  //   @Body() updateStudentDto: Prisma.studentsUpdateInput,
+  //   @UploadedFile() file: Express.Multer.File, // Handles file uploads
+  //   @Req() req: any, // Access raw request for form-data handling
+  // ) {
+  //   // Check if the request is `multipart/form-data`
+  //   if (req.is('multipart/form-data')) {
+  //     const formData = req.body;
+
+  //     // Merge form-data fields into the DTO
+  //     updateStudentDto = {
+  //       ...formData,
+  //       profileImage: file?.path || undefined, // Add file path if the file exists
+  //     };
+
+  //     console.log('FormData received:', formData);
+  //   }
+
+  //   console.log(
+  //     `Patch route hit with data: ${JSON.stringify(updateStudentDto)}`,
+  //   );
+  //   console.log(`Uploaded file:`, file);
+
+  //   return await this.studentsService.update(+id, updateStudentDto);
+  // }
   @Patch(':id')
-  @UseInterceptors(FileInterceptor('profileImage')) // Intercept file uploads under 'profileImage'
+  @UseInterceptors(FileInterceptor('profileImage')) // Intercept file uploads
   async update(
     @Param('id') id: string,
     @Body() updateStudentDto: Prisma.studentsUpdateInput,
     @UploadedFile() file: Express.Multer.File, // Handles file uploads
     @Req() req: any, // Access raw request for form-data handling
   ) {
-    // Check if the request is `multipart/form-data`
-    if (req.is('multipart/form-data')) {
-      const formData = req.body;
+    let updatedDto: Prisma.studentsUpdateInput = { ...updateStudentDto };
 
-      // Merge form-data fields into the DTO
-      updateStudentDto = {
-        ...formData,
-        profileImage: file?.path || undefined, // Add file path if the file exists
+    if (req.is('multipart/form-data') && file) {
+      const existingStudent = await this.studentsService.findOne(+id);
+      const oldImageUrl = existingStudent?.profile_photo;
+
+      const newImageUrl = await this.firebaseService.uploadFile(file);
+
+      updatedDto = {
+        ...updateStudentDto,
+        profile_photo: newImageUrl,
       };
 
-      console.log('FormData received:', formData);
+      if (oldImageUrl) {
+        await this.firebaseService.deleteFile(oldImageUrl);
+      }
     }
 
-    console.log(
-      `Patch route hit with data: ${JSON.stringify(updateStudentDto)}`,
-    );
-    console.log(`Uploaded file:`, file);
+    console.log(`Updating student with data: ${JSON.stringify(updatedDto)}`);
 
-    return await this.studentsService.update(+id, updateStudentDto);
+    return await this.studentsService.update(+id, updatedDto);
   }
 
   @Delete(':id')
