@@ -57,6 +57,15 @@ export class StudentsController {
     }
   }
 
+  @Patch('Status/:id')
+  async statusUpdate(
+    @Param('id') id: string,
+    @Body() updateStudentDto: Prisma.studentsUpdateInput,
+  ) {
+    console.log(`====>statusUpdate route hit<====`);
+    return await this.studentsService.statusUpdate(+id, updateStudentDto);
+  }
+
   @Get()
   async findAll() {
     return await this.studentsService.findAll();

@@ -1,5 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { Prisma, Steps } from '@prisma/client';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
+import { Prisma, Steps, Status } from '@prisma/client';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -87,6 +91,57 @@ export class StudentsService {
     return await this.prisma.students.update({
       where: { student_id: id },
       data: updateStudentDto,
+    });
+  }
+
+  async statusUpdate(id: number, updateStudentDto: Prisma.studentsUpdateInput) {
+    // Existing validation from previous implementation
+    const validKeys = ['status'];
+    const invalidKeys = Object.keys(updateStudentDto).filter(
+      (key) => !validKeys.includes(key),
+    );
+
+    if (invalidKeys.length > 0) {
+      throw new BadRequestException(
+        `Invalid fields detected: ${invalidKeys.join(', ')}. Only 'status' can be updated.`,
+      );
+    }
+
+    if (
+      !updateStudentDto.status ||
+      !Object.values(Status).includes(updateStudentDto.status as Status)
+    ) {
+      throw new BadRequestException(
+        `Invalid status value. Allowed values: ${Object.values(Status).join(', ')}`,
+      );
+    }
+
+    // New: Check if trying to set to "Accepted"
+    if (updateStudentDto.status === Status.approved) {
+      // Get current student data
+      const student = await this.prisma.students.findUnique({
+        where: { student_id: id },
+        select: { steps: true },
+      });
+
+      if (!student) {
+        throw new NotFoundException(`Student with ID ${id} not found`);
+      }
+
+      // Check if steps is not Step_8
+      if (student.steps !== Steps.step_8) {
+        throw new BadRequestException(
+          `Cannot accept student at step ${student.steps}. Student must complete all 8 steps first.`,
+        );
+      }
+    }
+
+    // Proceed with update
+    return await this.prisma.students.update({
+      where: { student_id: id },
+      data: {
+        status: updateStudentDto.status as Status,
+      },
     });
   }
 
