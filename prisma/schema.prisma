@@ -17,6 +17,13 @@ model Employee {
   updatedAt DateTime @updatedAt
 }
 
+model agreement{
+  agreement_id Int @id @default(autoincrement())
+  student_id Int  @unique
+  status Boolean @default(false)
+  students students? @relation(fields: [student_id], references: [student_id])
+}
+
 model admissions {
   admission_id          Int       @id @default(autoincrement())
   student_id            Int?      @unique
@@ -132,6 +139,7 @@ model students {
   matriculation_info    matriculation_info?
   required_documents    required_documents?
   residence_information residence_information?
+  agreement agreement?
 }
 enum Status {
   pending
@@ -154,4 +162,5 @@ enum Steps {
   step_6
   step_7
   step_8
+  step_9
 }

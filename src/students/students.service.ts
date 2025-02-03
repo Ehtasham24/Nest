@@ -77,6 +77,7 @@ export class StudentsService {
         matriculation_info: true,
         intermediate_info: true,
         required_documents: true,
+        agreement: true,
       },
     });
   }

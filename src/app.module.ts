@@ -17,6 +17,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { RequiredDocumentsModule } from './required_documents/required_documents.module';
 import { FirebaseModule } from './firebase/firebase.module';
+import { AgreementModule } from './agreement/agreement.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { FirebaseModule } from './firebase/firebase.module';
     PrismaModule,
     RequiredDocumentsModule,
     FirebaseModule,
+    AgreementModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
