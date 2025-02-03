@@ -1,15 +1,20 @@
 import {
   Injectable,
+  HttpException,
+  HttpStatus,
   BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma, Steps, Status } from '@prisma/client';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { HttpService } from '@nestjs/axios';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class StudentsService {
   constructor(
+    private readonly httpService: HttpService,
     private readonly prisma: PrismaService,
     private readonly firebaseService: FirebaseService,
   ) {}
@@ -80,6 +85,29 @@ export class StudentsService {
         agreement: true,
       },
     });
+  }
+
+  async updateStudentScore(id: number): Promise<any> {
+    // Call the Flask API to get the overall score
+    const flaskApiUrl = 'http://your-flask-api-url/endpoint'; // Replace with actual URL
+    try {
+      const response$ = this.httpService.get(flaskApiUrl);
+      const response = await lastValueFrom(response$);
+      const overallScore: number = response.data.overall_score;
+
+      const updatedStudent = await this.prisma.students.update({
+        where: { student_id: id },
+        data: { test_score: overallScore },
+      });
+
+      return updatedStudent;
+    } catch (error) {
+      // You can improve error handling based on your requirements
+      throw new HttpException(
+        'Failed to update student score',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async update(id: number, updateStudentDto: Prisma.studentsUpdateInput) {

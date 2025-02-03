@@ -57,6 +57,14 @@ export class StudentsController {
     }
   }
 
+  @Post('Score')
+  async createScore(@Body() body: { studentId: number }): Promise<any> {
+    const { studentId } = body;
+    const updatedStudent =
+      await this.studentsService.updateStudentScore(studentId);
+    return updatedStudent;
+  }
+
   @Patch('Status/:id')
   async statusUpdate(
     @Param('id') id: string,

@@ -3,9 +3,10 @@ import { StudentsService } from './students.service';
 import { StudentsController } from './students.controller';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { FirebaseService } from 'src/firebase/firebase.service';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, HttpModule],
   controllers: [StudentsController],
   providers: [StudentsService, FirebaseService],
 })
